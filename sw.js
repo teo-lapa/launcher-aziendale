@@ -1,4 +1,4 @@
-// Service Worker per PWA Launcher Aziendale
+// Service Worker per PWA Lapa Enterprise
 const VERSION = '2.0';
 const CACHE_NAME = `launcher-aziendale-v${VERSION}`;
 const urlsToCache = [

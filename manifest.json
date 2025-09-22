@@ -1,7 +1,7 @@
 {
-  "name": "Launcher Aziendale",
-  "short_name": "Launcher",
-  "description": "Launcher per accedere alle web app aziendali",
+  "name": "Lapa Enterprise",
+  "short_name": "Enterprise",
+  "description": "Lapa Enterprise - Portal aziendale per dipendenti",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#667eea",
