@@ -1,9 +1,11 @@
 // Service Worker per PWA Launcher Aziendale
-const CACHE_NAME = 'launcher-aziendale-v1.0';
+const VERSION = '2.0';
+const CACHE_NAME = `launcher-aziendale-v${VERSION}`;
 const urlsToCache = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './logo.png'
 ];
 
 // Installazione del Service Worker
@@ -17,18 +19,25 @@ self.addEventListener('install', function(event) {
   );
 });
 
-// Intercetta le richieste di rete
+// Intercetta le richieste di rete con strategia Network First
 self.addEventListener('fetch', function(event) {
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(function(response) {
-        // Cache hit - restituisce la risposta dalla cache
-        if (response) {
-          return response;
+        // Se la richiesta ha successo, aggiorna la cache
+        if (response && response.status === 200 && response.type === 'basic') {
+          const responseToCache = response.clone();
+          caches.open(CACHE_NAME)
+            .then(function(cache) {
+              cache.put(event.request, responseToCache);
+            });
         }
-        return fetch(event.request);
-      }
-    )
+        return response;
+      })
+      .catch(function() {
+        // Se la rete fallisce, usa la cache
+        return caches.match(event.request);
+      })
   );
 });
 

@@ -337,7 +337,7 @@
         
         <div class="footer">
             <button onclick="forceRefresh()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; margin-bottom: 10px; font-size: 12px;">🔄 Aggiorna</button>
-            <p>Versione 1.0 | La Tua Azienda</p>
+            <p>Versione 2.0 | <span id="updateStatus">Controllo aggiornamenti...</span></p>
         </div>
     </div>
 
@@ -363,6 +363,7 @@
             setupButtons();
             createParticles();
             addInteractiveEffects();
+            checkForUpdates();
         });
 
         function setupButtons() {
@@ -408,16 +409,45 @@
         // Prevent right click in production
         // document.addEventListener('contextmenu', e => e.preventDefault());
 
-        // Force refresh function
-        function forceRefresh() {
-            // Add loading animation
+        // Force refresh function with aggressive cache clearing
+        async function forceRefresh() {
             const button = event.target;
+            button.innerHTML = '🔄 Aggiornando...';
             button.style.transform = 'rotate(360deg)';
             button.style.transition = 'transform 0.5s ease';
+            button.disabled = true;
 
-            setTimeout(() => {
+            try {
+                // Clear service worker cache
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                }
+
+                // Clear all caches
+                if ('caches' in window) {
+                    const cacheNames = await caches.keys();
+                    await Promise.all(
+                        cacheNames.map(cacheName => caches.delete(cacheName))
+                    );
+                }
+
+                // Clear local storage
+                if (typeof(Storage) !== "undefined") {
+                    localStorage.clear();
+                    sessionStorage.clear();
+                }
+
+                // Force reload with cache busting
+                const timestamp = new Date().getTime();
+                window.location.href = window.location.href.split('?')[0] + '?v=' + timestamp;
+
+            } catch (error) {
+                console.log('Cache clearing failed, doing simple reload');
                 location.reload(true);
-            }, 500);
+            }
         }
 
         // Create floating particles
@@ -538,6 +568,31 @@
                 });
             }
         });
+
+        // Check for updates
+        function checkForUpdates() {
+            const currentVersion = '2.0';
+            const updateStatus = document.getElementById('updateStatus');
+
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.getRegistrations().then(registrations => {
+                    if (registrations.length > 0) {
+                        updateStatus.textContent = 'App aggiornata';
+
+                        // Listen for updates
+                        navigator.serviceWorker.addEventListener('controllerchange', () => {
+                            updateStatus.textContent = 'Nuovo aggiornamento disponibile!';
+                            updateStatus.style.color = '#ffeb3b';
+                            updateStatus.style.fontWeight = 'bold';
+                        });
+                    } else {
+                        updateStatus.textContent = 'Prima installazione';
+                    }
+                });
+            } else {
+                updateStatus.textContent = 'Lapa Launcher';
+            }
+        }
     </script>
 </body>
 </html>
