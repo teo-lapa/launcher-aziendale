@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Launcher Aziendale</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="description" content="Launcher per accedere alle web app aziendali">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Launcher Aziendale">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicons per diverse dimensioni -->
+    <link rel="icon" type="image/png" sizes="192x192" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%232563eb' rx='20'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>🚀</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%232563eb' rx='20'/><text x='50' y='65' font-size='50' text-anchor='middle' fill='white'>🚀</text></svg>">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 40px 30px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: #fff;
+            border-radius: 50%;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #2563eb;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            margin-bottom: 40px;
+            opacity: 0.8;
+        }
+
+        .buttons-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .app-button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 70px;
+        }
+
+        .app-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .app-button:active {
+            transform: translateY(0);
+        }
+
+        .app-button .icon {
+            margin-right: 15px;
+            font-size: 24px;
+        }
+
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        /* Responsive Design */
+        @media (min-width: 600px) {
+            .buttons-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+                min-height: 100vh;
+                padding: 60px 20px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+        }
+
+        /* Loading animation */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">🚀</div>
+        <h1>Launcher Aziendale</h1>
+        <p class="subtitle">Accedi alle tue web app aziendali</p>
+        
+        <div class="buttons-grid">
+            <a href="#" class="app-button" id="app1">
+                <span class="icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            
+            <a href="#" class="app-button" id="app2">
+                <span class="icon">📋</span>
+                <span>Gestione Ordini</span>
+            </a>
+            
+            <a href="#" class="app-button" id="app3">
+                <span class="icon">👥</span>
+                <span>Clienti</span>
+            </a>
+            
+            <a href="#" class="app-button" id="app4">
+                <span class="icon">📈</span>
+                <span>Report</span>
+            </a>
+        </div>
+        
+        <div class="footer">
+            <p>Versione 1.0 | La Tua Azienda</p>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURAZIONE - MODIFICA QUESTI LINK CON LE TUE WEB APP
+        const appLinks = {
+            app1: 'https://www.lapa.ch/',
+            app2: 'https://tuosito.com/ordini', 
+            app3: 'https://tuosito.com/clienti',
+            app4: 'https://tuosito.com/report'
+        };
+
+        // CONFIGURAZIONE - MODIFICA QUESTI NOMI SE VUOI
+        const appNames = {
+            app1: 'Dashboard',
+            app2: 'Gestione Ordini',
+            app3: 'Clienti', 
+            app4: 'Report'
+        };
+
+        // Inizializza l'app
+        document.addEventListener('DOMContentLoaded', function() {
+            setupButtons();
+        });
+
+        function setupButtons() {
+            Object.keys(appLinks).forEach(appId => {
+                const button = document.getElementById(appId);
+                const link = appLinks[appId];
+                
+                if (button && link && link !== '#') {
+                    button.href = link;
+                    button.target = '_blank';
+                    button.rel = 'noopener noreferrer';
+                    
+                    button.addEventListener('click', function(e) {
+                        // Feedback visivo
+                        this.classList.add('loading');
+                        setTimeout(() => {
+                            this.classList.remove('loading');
+                        }, 1000);
+                        
+                        // Per desktop, apri in nuova finestra
+                        if (window.innerWidth > 768) {
+                            e.preventDefault();
+                            window.open(link, '_blank', 'width=1200,height=800');
+                        }
+                    });
+                }
+            });
+        }
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('sw.js')
+                    .then(function(registration) {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(function(registrationError) {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+
+        // Prevent right click in production
+        // document.addEventListener('contextmenu', e => e.preventDefault());
+    </script>
+</body>
+</html>
