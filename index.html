@@ -350,6 +350,7 @@
         </div>
         
         <div class="footer">
+            <button id="installBtn" onclick="installPWA()" style="background: rgba(76, 175, 80, 0.8); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-bottom: 10px; font-size: 14px; font-weight: bold; display: none;">📱 Installa App</button>
             <button onclick="forceRefresh()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; margin-bottom: 10px; font-size: 12px;">🔄 Aggiorna</button>
             <p>Versione 2.0 | <span id="updateStatus">Controllo aggiornamenti...</span></p>
         </div>
@@ -372,12 +373,16 @@
             app4: 'Report'
         };
 
+        // PWA installation prompt
+        let deferredPrompt;
+
         // Inizializza l'app
         document.addEventListener('DOMContentLoaded', function() {
             setupButtons();
             createParticles();
             addInteractiveEffects();
             checkForUpdates();
+            setupPWAInstall();
         });
 
         function setupButtons() {
@@ -605,6 +610,86 @@
                 });
             } else {
                 updateStatus.textContent = 'Lapa Launcher';
+            }
+        }
+
+        // PWA Installation Logic
+        function setupPWAInstall() {
+            const installBtn = document.getElementById('installBtn');
+
+            // Check if already installed
+            if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) {
+                // Already installed as PWA
+                installBtn.style.display = 'none';
+                return;
+            }
+
+            // Check if running in PWA mode
+            if (window.navigator.standalone === true) {
+                // iOS PWA mode
+                installBtn.style.display = 'none';
+                return;
+            }
+
+            // Listen for the beforeinstallprompt event
+            window.addEventListener('beforeinstallprompt', (e) => {
+                console.log('PWA installable');
+                e.preventDefault();
+                deferredPrompt = e;
+                installBtn.style.display = 'block';
+            });
+
+            // Listen for successful installation
+            window.addEventListener('appinstalled', () => {
+                console.log('PWA installed successfully');
+                installBtn.style.display = 'none';
+                deferredPrompt = null;
+            });
+
+            // For iOS devices, show install button if not in standalone mode
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            if (isIOS && !window.navigator.standalone) {
+                installBtn.innerHTML = '📱 Aggiungi alla Home';
+                installBtn.onclick = function() {
+                    alert('Per installare l\'app:\n1. Tocca il pulsante Condividi\n2. Scorri e tocca "Aggiungi alla schermata Home"\n3. Tocca "Aggiungi"');
+                };
+                installBtn.style.display = 'block';
+            }
+        }
+
+        // Install PWA function
+        async function installPWA() {
+            const installBtn = document.getElementById('installBtn');
+
+            if (!deferredPrompt) {
+                return;
+            }
+
+            // Show install animation
+            installBtn.innerHTML = '⏳ Installando...';
+            installBtn.disabled = true;
+
+            try {
+                // Show the install prompt
+                deferredPrompt.prompt();
+
+                // Wait for the user's response
+                const { outcome } = await deferredPrompt.userChoice;
+
+                if (outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                    installBtn.style.display = 'none';
+                } else {
+                    console.log('User dismissed the install prompt');
+                    installBtn.innerHTML = '📱 Installa App';
+                    installBtn.disabled = false;
+                }
+
+                deferredPrompt = null;
+            } catch (error) {
+                console.error('Error during installation:', error);
+                installBtn.innerHTML = '📱 Installa App';
+                installBtn.disabled = false;
             }
         }
     </script>
