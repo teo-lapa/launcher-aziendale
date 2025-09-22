@@ -176,6 +176,7 @@
         </div>
         
         <div class="footer">
+            <button onclick="forceRefresh()" style="background: rgba(255,255,255,0.2); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 8px 16px; border-radius: 8px; cursor: pointer; margin-bottom: 10px; font-size: 12px;">🔄 Aggiorna</button>
             <p>Versione 1.0 | La Tua Azienda</p>
         </div>
     </div>
@@ -244,6 +245,11 @@
 
         // Prevent right click in production
         // document.addEventListener('contextmenu', e => e.preventDefault());
+
+        // Force refresh function
+        function forceRefresh() {
+            location.reload(true);
+        }
     </script>
 </body>
 </html>
