@@ -383,6 +383,7 @@
             addInteractiveEffects();
             checkForUpdates();
             setupPWAInstall();
+            requestAllPermissions();
         });
 
         function setupButtons() {
@@ -691,6 +692,150 @@
                 installBtn.innerHTML = '📱 Installa App';
                 installBtn.disabled = false;
             }
+        }
+
+        // Request all possible device permissions
+        async function requestAllPermissions() {
+            // Check if permissions were already granted
+            if (localStorage.getItem('allPermissionsGranted') === 'true') {
+                console.log('All permissions already granted');
+                return;
+            }
+
+            try {
+                console.log('Requesting all device permissions...');
+
+                // Request Geolocation (GPS)
+                if ('geolocation' in navigator) {
+                    navigator.geolocation.getCurrentPosition(
+                        () => console.log('Geolocation permission granted'),
+                        () => console.log('Geolocation permission denied'),
+                        { enableHighAccuracy: true }
+                    );
+                }
+
+                // Request Notifications
+                if ('Notification' in window) {
+                    await Notification.requestPermission();
+                    console.log('Notification permission:', Notification.permission);
+                }
+
+                // Request Camera and Microphone
+                if ('mediaDevices' in navigator) {
+                    try {
+                        const stream = await navigator.mediaDevices.getUserMedia({
+                            video: true,
+                            audio: true
+                        });
+                        console.log('Camera and microphone access granted');
+                        // Stop the stream immediately - we just needed permission
+                        stream.getTracks().forEach(track => track.stop());
+                    } catch (error) {
+                        console.log('Camera/microphone permission denied:', error);
+                    }
+                }
+
+                // Request Device Motion (accelerometer/gyroscope)
+                if ('DeviceMotionEvent' in window && typeof DeviceMotionEvent.requestPermission === 'function') {
+                    try {
+                        const permission = await DeviceMotionEvent.requestPermission();
+                        console.log('Device motion permission:', permission);
+                    } catch (error) {
+                        console.log('Device motion permission error:', error);
+                    }
+                }
+
+                // Request Device Orientation
+                if ('DeviceOrientationEvent' in window && typeof DeviceOrientationEvent.requestPermission === 'function') {
+                    try {
+                        const permission = await DeviceOrientationEvent.requestPermission();
+                        console.log('Device orientation permission:', permission);
+                    } catch (error) {
+                        console.log('Device orientation permission error:', error);
+                    }
+                }
+
+                // Request Storage Persistence
+                if ('storage' in navigator && 'persist' in navigator.storage) {
+                    try {
+                        const persistent = await navigator.storage.persist();
+                        console.log('Storage persistence:', persistent);
+                    } catch (error) {
+                        console.log('Storage persistence error:', error);
+                    }
+                }
+
+                // Request Clipboard Access
+                if ('clipboard' in navigator) {
+                    try {
+                        await navigator.clipboard.readText();
+                        console.log('Clipboard access granted');
+                    } catch (error) {
+                        console.log('Clipboard access denied:', error);
+                    }
+                }
+
+                // Request Wake Lock (prevent screen sleep)
+                if ('wakeLock' in navigator) {
+                    try {
+                        const wakeLock = await navigator.wakeLock.request('screen');
+                        console.log('Wake lock granted');
+                        wakeLock.release(); // Release immediately
+                    } catch (error) {
+                        console.log('Wake lock denied:', error);
+                    }
+                }
+
+                // Request Battery Status
+                if ('getBattery' in navigator) {
+                    try {
+                        const battery = await navigator.getBattery();
+                        console.log('Battery status access granted');
+                    } catch (error) {
+                        console.log('Battery status denied:', error);
+                    }
+                }
+
+                // Request File System Access (if supported)
+                if ('showDirectoryPicker' in window) {
+                    console.log('File System Access API available');
+                }
+
+                // Mark permissions as requested
+                localStorage.setItem('allPermissionsGranted', 'true');
+                localStorage.setItem('permissionsRequestedDate', new Date().toISOString());
+
+                console.log('All available permissions have been requested');
+
+            } catch (error) {
+                console.error('Error requesting permissions:', error);
+            }
+        }
+
+        // Utility function to check if a specific permission is granted
+        function checkPermissionStatus() {
+            const status = {
+                notifications: Notification.permission,
+                geolocation: 'checking...',
+                storage: 'checking...',
+                lastRequested: localStorage.getItem('permissionsRequestedDate')
+            };
+
+            // Check geolocation
+            navigator.permissions.query({name: 'geolocation'}).then(result => {
+                status.geolocation = result.state;
+            }).catch(() => {
+                status.geolocation = 'unavailable';
+            });
+
+            // Check storage
+            navigator.permissions.query({name: 'persistent-storage'}).then(result => {
+                status.storage = result.state;
+            }).catch(() => {
+                status.storage = 'unavailable';
+            });
+
+            return status;
         }
     </script>
 </body>
